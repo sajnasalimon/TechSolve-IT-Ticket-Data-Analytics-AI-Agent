@@ -19,9 +19,10 @@ End-to-end data pipeline, dashboard, and natural-language AI agent built on **Da
    - [3. Bronze Layer: Raw Ticket Data Ingestion](#3-bronze-layer-raw-ticket-data-ingestion)
    - [4. Silver Layer: Data Cleaning, Enrichment & Validation](#4-silver-layer-data-cleaning-enrichment--validation)
    - [5. Gold Layer: Aggregated Reporting View](#5-gold-layer-aggregated-reporting-view)
-   - 6.. [Dashboard](#dashboard)
-   - [7.. Orchestration: End-to-End Pipeline Automation](#6-orchestration-end-to-end-pipeline-automation)
+   - [6. Dashboard: Reporting & Visualisation](#6-dashboard-reporting--visualisation)
+   - [7. Orchestration: End-to-End Pipeline Automation](#7-orchestration-end-to-end-pipeline-automation)
 8. [AI Agent](#ai-agent)
+
 
 
 ---
