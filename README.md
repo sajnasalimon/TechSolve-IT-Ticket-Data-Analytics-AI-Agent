@@ -43,20 +43,20 @@ The solution covers three parts:
 
 ```
 .
+.
 ├── README.md
 ├── notebooks/
-│   ├── Lookup_tables.ipynb        # External holiday API + category lookup (bronze)
-│   ├── Bronze_Load.ipynb          # Excel → CSV → Delta (Auto Loader)
-│   └── silver_Load.ipynb          # Cleaning, joins, validation, quarantine
-├── docs/
-│   ├── images/
-│   │   ├── job_pipeline.png
-│   │   ├── job_runs.png
-│   │   ├── dashboard.png
-│   │   └── genie_agent.png
-│   └── review.pdf                 # Full written review (LaTeX-generated)
-└── data/
-    └── TechSolve_Ticket_Data.xlsx # Source dataset (synthetic)
+│   ├── Lookup_tables.ipynb        
+│   ├── Bronze_Load.ipynb          
+│   ├── silver_Load.ipynb          
+│   └── Gold_Load.ipynb           
+└── docs/
+    ├── images/
+    │   ├── job_pipeline.png
+    │   └── job_runs.png
+    ├── dashboard.pdf                 
+    ├── genie_agent.pdf                
+    └── TechSolve_Ticket_Data.xlsx     
 ```
 
 ---
@@ -89,7 +89,7 @@ The pipeline follows a standard **medallion architecture** (bronze → silver �
 
 | Dataset | Source | Reason for inclusion |
 |---------|--------|----------------------|
-| **TechSolve Ticket Data** | Synthetic Excel export | Core dataset — raw support ticket records |
+| **TechSolve Ticket Data** | Synthetic Excel export ([download](docs/TechSolve_Ticket_Data.xlsx)) | Core dataset — raw support ticket records |
 | **NZ Public Holidays (1990–2030)** | [Nager.Date Public Holiday API](https://date.nager.at/Api) | Free, no API key required, returns clean structured JSON. Used to test whether ticket volume/type is affected by public holidays (e.g. spikes before a long weekend, dips during holiday periods) |
 
 ---
@@ -148,11 +148,20 @@ From the clean silver table, `gold_ticket_summary` was built as a **materialized
 - **Query performance** — results are pre-computed, so downstream tools (dashboard, AI agent) get table-like query speed while always reflecting the latest silver data.
 - **Simplicity** — removes the need for extra orchestration logic to manage refresh timing, since Databricks handles incremental recomputation itself.
 
-The view reports ticket counts by `cleaned_category`, `cleaned_sub_category`, and day, alongside a `tickets_on_holiday` measure.
+**Table:** `techsolve.ticket_gold.gold_ticket_data`
+**Notebook:** `Gold_Load.ipynb`
 
-**Table:** `techsolve.ticket_gold.gold_ticket_summary`
+## 6. Dashboard
 
-### 6. Orchestration: End-to-End Pipeline Automation
+Built on **Databricks AI/BI Dashboard**, reading directly from `gold_ticket_summary`. Reports on:
+- Ticket volume and issue type breakdown (category / sub-category)
+- Ticket status and resolution time trends (2024–2025)
+- Ticket volume in relation to NZ public holidays
+
+[View full dashboard (PDF)](docs/images/Ticket_Data_Analytics_Support.pdf)
+
+
+### 7. Orchestration: End-to-End Pipeline Automation
 
 All stages above are wired into a single Databricks Job — **`TechSolve_Ticket_job_project`** — with five sequential tasks:
 
@@ -166,24 +175,14 @@ The full pipeline runs end-to-end on a single trigger. A complete run currently 
 ![Job Run History](docs/images/pipeline.png)
 *Figure 2: Successful end-to-end job run (~10 minutes total duration)*(see Figure 2 above).
 
----
-
-## Dashboard
-
-Built on **Databricks AI/BI Dashboard**, reading directly from `gold_ticket_summary`. Reports on:
-- Ticket volume and issue type breakdown (category / sub-category)
-- Ticket status and resolution time trends (2024–2025)
-- Ticket volume in relation to NZ public holidays
-
-![Dashboard Screenshot](docs/images/dashboard.png)
-*Figure 3: TechSolve ticket summary dashboard*
-
 ## AI Agent
 
 Built using **Genie (Databricks AI/BI Genie)**, connected directly to the gold-layer tables. It can answer natural-language operational questions such as ticket trends, team performance, and problem areas, without a separate AI service, custom API integration, or additional authentication layer.
 
-![AI Agent Screenshot](docs/images/genie_agent.png)
-*Figure 4: Genie natural-language agent answering an operational question*
+[View full dashboard (PDF)](docs/images/Ticket_Data_Analytics_AI_Agent.pdf)
+---
+
+
 
 ---
 
