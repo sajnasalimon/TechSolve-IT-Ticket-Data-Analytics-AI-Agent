@@ -22,9 +22,6 @@ End-to-end data pipeline, dashboard, and natural-language AI agent built on **Da
 6. [Dashboard](#dashboard)
 7. [AI Agent](#ai-agent)
 8. [Repository Structure](#repository-structure)
-9. [What I Would Do Differently](#what-i-would-do-differently)
-10. [Challenges](#challenges)
-11. [AI Tool Usage Disclosure](#ai-tool-usage-disclosure)
 
 ---
 
@@ -190,19 +187,3 @@ Built using **Genie (Databricks AI/BI Genie)**, connected directly to the gold-l
 ```
 
 ---
-
-## What I Would Do Differently
-
-1. **Data governance for sensitive fields** — apply column-level governance (e.g. masking or restricted access via Unity Catalog) to fields like customer email, billing contact email, and customer name.
-2. **Column-level data quality testing** — extend validation beyond dates/IDs to systematic checks across every column (value ranges, valid category membership, completeness).
-3. **SCD Type 2 handling** — preserve historical changes to fields like `account_manager` or `customer_segment`, so a ticket can be tied to who was responsible *at the time it was raised*, not just the current value.
-
-## Challenges
-
-The most challenging issue arose while building the Auto Loader ingestion pipeline. Excel files were initially converted directly to **Parquet**, and the first file ingested established the schema for the target table. When a later file arrived with nulls in a column that had previously contained non-null values, the Excel-to-Parquet conversion inferred a different data type for that column. Since Parquet embeds schema information within each file, Auto Loader detected a schema mismatch and ingestion failed.
-
-**Fix:** switched the intermediate format from Parquet to **CSV**. CSV doesn't embed data types — only raw text — so Auto Loader instead inferred the schema consistently from the data itself at ingestion time, resolving the mismatch and allowing the pipeline to run reliably even as new, imperfect files arrived.
-
-## AI Tool Usage Disclosure
-
-AI (Claude) was used in a limited, supporting capacity — mainly as a research aid to explore Databricks concepts such as Auto Loader and materialized view refresh behaviour, to sanity-check SQL/PySpark syntax, and to help structure and phrase the written review. The pipeline design, data modelling decisions, debugging, and implementation were carried out directly in Databricks.
