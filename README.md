@@ -46,7 +46,7 @@ The solution covers three parts:
 
 The pipeline follows a standard **medallion architecture** (bronze → silver → gold), which keeps ingestion, cleaning, and enrichment separated, auditable, and independently re-runnable.
 
-![Pipeline Architecture](docs/images/job_pipeline.jpeg)
+![Pipeline Architecture](docs/images/job_pipeline.jpg)
 *Figure 1: Databricks Job pipeline — Holiday/Category lookup → Bronze → Silver → Gold → Dashboard*
 
 ![Job Run History](docs/images/job_runs.png)
