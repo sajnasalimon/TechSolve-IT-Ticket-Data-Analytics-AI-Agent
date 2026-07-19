@@ -87,13 +87,13 @@ NZ public holiday data for 1990–2030 was pulled from the Nager.Date API and th
 
 This was kept as a fully separate, standalone step from the ticket data, since it comes from an external source with its own refresh cycle.
 
-**Notebook:** `Lookup_tables.ipynb`
+**Notebook:** [Lookup_tables.ipynb](notebooks/Lookup_tables.ipynb)
 
 ### 2. Reference Data: Standardising Ticket Categories (Bronze Layer)
 
 A `category_lookup` table was built by hand, mapping the many inconsistent raw ticket category values (e.g. `BUG`, `Bug Report`, `bug_report`) into a single standardised `cleaned_category` and `cleaned_sub_category`. Splitting this into two levels allows reporting to either roll up to a small number of high-level categories for an executive view, or drill into sub-categories for operational detail.
 
-**Notebook:** `Lookup_tables.ipynb`
+**Notebook:** [Lookup_tables.ipynb](notebooks/Lookup_tables.ipynb)
 
 ### 3. Bronze Layer: Raw Ticket Data Ingestion
 
@@ -101,7 +101,7 @@ The provided Excel ticket export was converted to CSV via a small Python/pandas 
 
 Auto Loader was chosen specifically because it tracks which files have already been processed, so re-running the pipeline never re-ingests or duplicates a file already loaded — it only picks up new files landing in the input path. This also means the same pipeline is ready to handle ticket data arriving as a continuous stream in future, rather than only as a one-off batch export.
 
-**Notebook:** `Bronze_Load.ipynb`
+**Notebook:** [Bronze_Load.ipynb](notebooks/Bronze_Load.ipynb)
 
 ### 4. Silver Layer: Data Cleaning, Enrichment & Validation
 
@@ -122,7 +122,7 @@ A set of data-quality validation rules was also applied, and the output was deli
 1. **Visibility** — silently discarding records hides data-quality issues from downstream users; an operations manager would have no way of knowing records were excluded, or why. A dedicated quarantine table keeps these issues visible and auditable.
 2. **Recoverability** — many flagged records aren't necessarily unusable, just mistyped or affected by an export glitch. Keeping them in their own table allows the support or data team to review, correct, and re-submit them through the bronze layer, rather than losing them permanently.
 
-**Notebook:** `silver_Load.ipynb`
+**Notebook:** [silver_Load.ipynb](notebooks/silver_Load.ipynb)
 
 ### 5. Gold Layer: Aggregated Reporting View
 
