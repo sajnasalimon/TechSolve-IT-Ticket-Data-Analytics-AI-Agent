@@ -19,8 +19,8 @@ End-to-end data pipeline, dashboard, and natural-language AI agent built on **Da
    - [3. Bronze Layer: Raw Ticket Data Ingestion](#3-bronze-layer-raw-ticket-data-ingestion)
    - [4. Silver Layer: Data Cleaning, Enrichment & Validation](#4-silver-layer-data-cleaning-enrichment--validation)
    - [5. Gold Layer: Aggregated Reporting View](#5-gold-layer-aggregated-reporting-view)
-   - [6. Orchestration: End-to-End Pipeline Automation](#6-orchestration-end-to-end-pipeline-automation)
-7. [Dashboard](#dashboard)
+   - 6.. [Dashboard](#dashboard)
+   - [7.. Orchestration: End-to-End Pipeline Automation](#6-orchestration-end-to-end-pipeline-automation)
 8. [AI Agent](#ai-agent)
 
 
@@ -89,7 +89,7 @@ The pipeline follows a standard **medallion architecture** (bronze → silver �
 
 | Dataset | Source | Reason for inclusion |
 |---------|--------|----------------------|
-| **TechSolve Ticket Data** | Synthetic Excel export ([download](docs/TechSolve_Ticket_Data.xlsx)) | Core dataset — raw support ticket records |
+| **TechSolve Ticket Data** | Synthetic Excel export ([download](<docs/TechSolve%20-%20Ticket%20Data.xlsx>)) | Core dataset — raw support ticket records |
 | **NZ Public Holidays (1990–2030)** | [Nager.Date Public Holiday API](https://date.nager.at/Api) | Free, no API key required, returns clean structured JSON. Used to test whether ticket volume/type is affected by public holidays (e.g. spikes before a long weekend, dips during holiday periods) |
 
 ---
@@ -142,14 +142,14 @@ A set of data-quality validation rules was also applied, and the output was deli
 
 ### 5. Gold Layer: Aggregated Reporting View
 
-From the clean silver table, `gold_ticket_summary` was built as a **materialized view** rather than a plain table, chosen for three reasons:
+From the clean silver table, `gold_ticket_data` was built as a **materialized view** rather than a plain table, chosen for three reasons:
 
 - **Automatic freshness** — incrementally refreshes whenever the underlying silver table changes, with no manual rebuild step or separate scheduled job.
 - **Query performance** — results are pre-computed, so downstream tools (dashboard, AI agent) get table-like query speed while always reflecting the latest silver data.
 - **Simplicity** — removes the need for extra orchestration logic to manage refresh timing, since Databricks handles incremental recomputation itself.
 
 **Table:** `techsolve.ticket_gold.gold_ticket_data`
-**Notebook:** `Gold_Load.ipynb`
+**Notebook:** [Gold_Load.ipynb](notebooks/Gold_Load.ipynb)
 
 ## 6. Dashboard
 
@@ -158,7 +158,7 @@ Built on **Databricks AI/BI Dashboard**, reading directly from `gold_ticket_summ
 - Ticket status and resolution time trends (2024–2025)
 - Ticket volume in relation to NZ public holidays
 
-[View full dashboard (PDF)](docs/images/Ticket_Data_Analytics_Support.pdf)
+[View full dashboard (PDF)](docs/Ticket_Analytics_Dashbaord.pdf)
 
 
 ### 7. Orchestration: End-to-End Pipeline Automation
@@ -168,7 +168,7 @@ All stages above are wired into a single Databricks Job — **`TechSolve_Ticket_
 1. `Holiday_API_and_Category_lookup`
 2. `Bronze_Ticket`
 3. `Silver_Ticket`
-4. `Gold_Ticket_category_summary`
+4. `gold_ticket_data`
 5. `Ticket_Summary_Dashboard`
 
 The full pipeline runs end-to-end on a single trigger. A complete run currently takes around **10 minutes** 
