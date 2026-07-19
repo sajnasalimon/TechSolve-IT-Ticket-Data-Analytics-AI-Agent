@@ -1,6 +1,6 @@
 # TechSolve IT — Ticket Data Analytics & AI Agent
 
-End-to-end data pipeline, dashboard, and natural-language AI agent built on **Databricks**, developed as part of a Data & AI Specialist practical assessment. The project ingests TechSolve's support ticket export, enriches it with an external New Zealand public holiday dataset, cleans and standardises it through a medallion (bronze → silver → gold) architecture, and surfaces the results through a dashboard and an AI-powered natural-language agent.
+End-to-end data pipeline, dashboard, and natural-language AI agent built on **Databricks**. The project ingests TechSolve's support ticket export, enriches it with an external New Zealand public holiday dataset, cleans and standardises it through a medallion (bronze → silver → gold) architecture, and surfaces the results through a dashboard and an AI-powered natural-language agent.
 
 > **Note:** All data used in this project is synthetic. No real customer or business data is included.
 
@@ -9,19 +9,20 @@ End-to-end data pipeline, dashboard, and natural-language AI agent built on **Da
 ## Table of Contents
 
 1. [Project Overview](#project-overview)
-2. [Architecture](#architecture)
-3. [Tech Stack](#tech-stack)
-4. [Data Sources](#data-sources)
-5. [Pipeline Walkthrough](#pipeline-walkthrough)
+2. [Repository Structure](#repository-structure)
+3. [Architecture](#architecture)
+4. [Tech Stack](#tech-stack)
+5. [Data Sources](#data-sources)
+6. [Pipeline Walkthrough](#pipeline-walkthrough)
    - [1. External Enrichment Data: Public Holiday API Ingestion (Bronze Layer)](#1-external-enrichment-data-public-holiday-api-ingestion-bronze-layer)
    - [2. Reference Data: Standardising Ticket Categories (Bronze Layer)](#2-reference-data-standardising-ticket-categories-bronze-layer)
    - [3. Bronze Layer: Raw Ticket Data Ingestion](#3-bronze-layer-raw-ticket-data-ingestion)
    - [4. Silver Layer: Data Cleaning, Enrichment & Validation](#4-silver-layer-data-cleaning-enrichment--validation)
    - [5. Gold Layer: Aggregated Reporting View](#5-gold-layer-aggregated-reporting-view)
    - [6. Orchestration: End-to-End Pipeline Automation](#6-orchestration-end-to-end-pipeline-automation)
-6. [Dashboard](#dashboard)
-7. [AI Agent](#ai-agent)
-8. [Repository Structure](#repository-structure)
+7. [Dashboard](#dashboard)
+8. [AI Agent](#ai-agent)
+
 
 ---
 
@@ -38,16 +39,33 @@ The solution covers three parts:
 | 3 | An AI agent that can answer natural-language questions about the data |
 
 ---
+## Repository Structure
 
+```
+.
+├── README.md
+├── notebooks/
+│   ├── Lookup_tables.ipynb        # External holiday API + category lookup (bronze)
+│   ├── Bronze_Load.ipynb          # Excel → CSV → Delta (Auto Loader)
+│   └── silver_Load.ipynb          # Cleaning, joins, validation, quarantine
+├── docs/
+│   ├── images/
+│   │   ├── job_pipeline.png
+│   │   ├── job_runs.png
+│   │   ├── dashboard.png
+│   │   └── genie_agent.png
+│   └── review.pdf                 # Full written review (LaTeX-generated)
+└── data/
+    └── TechSolve_Ticket_Data.xlsx # Source dataset (synthetic)
+```
+
+---
 ## Architecture
 
 The pipeline follows a standard **medallion architecture** (bronze → silver → gold), which keeps ingestion, cleaning, and enrichment separated, auditable, and independently re-runnable.
 
 ![Pipeline Architecture](docs/images/job_pipeline.jpg)
 *Figure 1: Databricks Job pipeline — Holiday/Category lookup → Bronze → Silver → Gold → Dashboard*
-
-![Job Run History](docs/images/job_runs.png)
-*Figure 2: Successful end-to-end job run (~10 minutes total duration)*
 
 > Screenshots are stored in `docs/images/` — see [Repository Structure](#repository-structure).
 
@@ -71,10 +89,11 @@ The pipeline follows a standard **medallion architecture** (bronze → silver �
 
 | Dataset | Source | Reason for inclusion |
 |---------|--------|----------------------|
-| **TechSolve Ticket Data** | Provided as part of this assessment (Excel export) | Core dataset — raw support ticket records |
+| **TechSolve Ticket Data** | Synthetic Excel export | Core dataset — raw support ticket records |
 | **NZ Public Holidays (1990–2030)** | [Nager.Date Public Holiday API](https://date.nager.at/Api) | Free, no API key required, returns clean structured JSON. Used to test whether ticket volume/type is affected by public holidays (e.g. spikes before a long weekend, dips during holiday periods) |
 
 ---
+
 
 ## Pipeline Walkthrough
 
@@ -143,7 +162,9 @@ All stages above are wired into a single Databricks Job — **`TechSolve_Ticket_
 4. `Gold_Ticket_category_summary`
 5. `Ticket_Summary_Dashboard`
 
-The full pipeline runs end-to-end on a single trigger. A complete run currently takes around **10 minutes** (see Figures 1 and 2 above).
+The full pipeline runs end-to-end on a single trigger. A complete run currently takes around **10 minutes** 
+![Job Run History](docs/images/pipeline.png)
+*Figure 2: Successful end-to-end job run (~10 minutes total duration)*(see Figure 2 above).
 
 ---
 
@@ -166,24 +187,4 @@ Built using **Genie (Databricks AI/BI Genie)**, connected directly to the gold-l
 
 ---
 
-## Repository Structure
 
-```
-.
-├── README.md
-├── notebooks/
-│   ├── Lookup_tables.ipynb        # External holiday API + category lookup (bronze)
-│   ├── Bronze_Load.ipynb          # Excel → CSV → Delta (Auto Loader)
-│   └── silver_Load.ipynb          # Cleaning, joins, validation, quarantine
-├── docs/
-│   ├── images/
-│   │   ├── job_pipeline.png
-│   │   ├── job_runs.png
-│   │   ├── dashboard.png
-│   │   └── genie_agent.png
-│   └── review.pdf                 # Full written review (LaTeX-generated)
-└── data/
-    └── TechSolve_Ticket_Data.xlsx # Source dataset (synthetic)
-```
-
----
