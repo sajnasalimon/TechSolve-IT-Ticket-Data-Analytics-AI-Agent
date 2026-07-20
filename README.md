@@ -180,7 +180,7 @@ The full pipeline runs end-to-end on a single trigger. A complete run currently 
 
 Built using **Genie (Databricks AI/BI Genie)**, connected directly to the gold-layer tables. It can answer natural-language operational questions such as ticket trends, team performance, and problem areas, without a separate AI service, custom API integration, or additional authentication layer.
 
-[View full dashboard (PDF)](docs/images/Ticket_Data_Analytics_AI_Agent.pdf)
+[View full dashboard (PDF)](docs/Ticket_Data_Analytics_AI_Agent.pdf)
 ---
 
 
