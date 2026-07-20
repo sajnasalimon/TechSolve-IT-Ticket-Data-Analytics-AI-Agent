@@ -44,7 +44,7 @@ The solution covers three parts:
 
 ```
 .
-.
+
 ├── README.md
 ├── notebooks/
 │   ├── Lookup_tables.ipynb        
@@ -54,11 +54,13 @@ The solution covers three parts:
 └── docs/
     ├── images/
     │   ├── job_pipeline.png
-    │   └── job_runs.png
+    │   ├── job_runs.png
+    │   ├── category_lookup_table.png
+    │   ├── holiday_table.png
+    │   └── quarantine_table.png
     ├── dashboard.pdf                 
     ├── genie_agent.pdf                
-    └── TechSolve_Ticket_Data.xlsx     
-```
+    └── TechSolve_Ticket_Data.xlsx   
 
 ---
 ## Architecture
@@ -98,17 +100,21 @@ The pipeline follows a standard **medallion architecture** (bronze → silver �
 
 ## Pipeline Walkthrough
 
-### 1. External Enrichment Data: Public Holiday API Ingestion (Bronze Layer)
+### 1.Public Holiday API Ingestion (Bronze Layer)
 
 NZ public holiday data for 1990–2030 was pulled from the Nager.Date API and the raw JSON response saved into a bronze volume. From this raw response, only the fields needed for reporting were extracted — `date`, `name` (holiday name), and `global` (a flag, provided natively by the API, indicating whether a holiday is observed nationwide or only regionally). Records were de-duplicated by date and loaded into a dedicated `holiday_lookup` Delta table.
 
 This was kept as a fully separate, standalone step from the ticket data, since it comes from an external source with its own refresh cycle.
 
+![Holiday Lookup Table](docs/images/holiday_table.png)
+*Figure 3: `holiday_lookup` table — NZ public holidays with `global` flag indicating nationwide vs. regional observance*
 **Notebook:** [Lookup_tables.ipynb](notebooks/Lookup_tables.ipynb)
 
 ### 2. Reference Data: Standardising Ticket Categories (Bronze Layer)
 
 A `category_lookup` table was built by hand, mapping the many inconsistent raw ticket category values (e.g. `BUG`, `Bug Report`, `bug_report`) into a single standardised `cleaned_category` and `cleaned_sub_category`. Splitting this into two levels allows reporting to either roll up to a small number of high-level categories for an executive view, or drill into sub-categories for operational detail.
+![Category Lookup Table](docs/images/category_lookup_table.png)
+*Figure 4: `category_lookup` table — raw ticket category values mapped to standardised `cleaned_category` and `cleaned_sub_category`*
 
 **Notebook:** [Lookup_tables.ipynb](notebooks/Lookup_tables.ipynb)
 
@@ -139,6 +145,8 @@ A set of data-quality validation rules was also applied, and the output was deli
 1. **Visibility** — silently discarding records hides data-quality issues from downstream users; an operations manager would have no way of knowing records were excluded, or why. A dedicated quarantine table keeps these issues visible and auditable.
 2. **Recoverability** — many flagged records aren't necessarily unusable, just mistyped or affected by an export glitch. Keeping them in their own table allows the support or data team to review, correct, and re-submit them through the bronze layer, rather than losing them permanently.
 
+![Quarantine Table](docs/images/quarantine_table.png)
+*Figure 5: `ticket_silver_quarantine` table — records failing validation, retained (not dropped) for review and re-submission*
 **Notebook:** [silver_Load.ipynb](notebooks/silver_Load.ipynb)
 
 ### 5. Gold Layer: Aggregated Reporting View
