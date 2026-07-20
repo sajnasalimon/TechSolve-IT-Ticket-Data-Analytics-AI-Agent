@@ -21,9 +21,7 @@ End-to-end data pipeline, dashboard, and natural-language AI agent built on **Da
    - [5. Gold Layer: Aggregated Reporting View](#5-gold-layer-aggregated-reporting-view)
    - [6. Dashboard: Reporting & Visualisation](#6-dashboard-reporting--visualisation)
    - [7. Orchestration: End-to-End Pipeline Automation](#7-orchestration-end-to-end-pipeline-automation)
-8. [AI Agent](#ai-agent)
-
-
+7. [AI Agent](#ai-agent)
 
 ---
 
@@ -40,17 +38,17 @@ The solution covers three parts:
 | 3 | An AI agent that can answer natural-language questions about the data |
 
 ---
+
 ## Repository Structure
 
 ```
 .
-
 ├── README.md
 ├── notebooks/
-│   ├── Lookup_tables.ipynb        
-│   ├── Bronze_Load.ipynb          
-│   ├── silver_Load.ipynb          
-│   └── Gold_Load.ipynb           
+│   ├── Lookup_tables.ipynb
+│   ├── Bronze_Load.ipynb
+│   ├── silver_Load.ipynb
+│   └── Gold_Load.ipynb
 └── docs/
     ├── images/
     │   ├── job_pipeline.png
@@ -58,11 +56,13 @@ The solution covers three parts:
     │   ├── category_lookup_table.png
     │   ├── holiday_table.png
     │   └── quarantine_table.png
-    ├── dashboard.pdf                 
-    ├── genie_agent.pdf                
-    └── TechSolve_Ticket_Data.xlsx   
+    ├── dashboard.pdf
+    ├── genie_agent.pdf
+    └── TechSolve_Ticket_Data.xlsx
+```
 
 ---
+
 ## Architecture
 
 The pipeline follows a standard **medallion architecture** (bronze → silver → gold), which keeps ingestion, cleaning, and enrichment separated, auditable, and independently re-runnable.
@@ -97,22 +97,24 @@ The pipeline follows a standard **medallion architecture** (bronze → silver �
 
 ---
 
-
 ## Pipeline Walkthrough
 
-### 1.Public Holiday API Ingestion (Bronze Layer)
+### 1. External Enrichment Data: Public Holiday API Ingestion (Bronze Layer)
 
 NZ public holiday data for 1990–2030 was pulled from the Nager.Date API and the raw JSON response saved into a bronze volume. From this raw response, only the fields needed for reporting were extracted — `date`, `name` (holiday name), and `global` (a flag, provided natively by the API, indicating whether a holiday is observed nationwide or only regionally). Records were de-duplicated by date and loaded into a dedicated `holiday_lookup` Delta table.
 
 This was kept as a fully separate, standalone step from the ticket data, since it comes from an external source with its own refresh cycle.
 
 ![Holiday Lookup Table](docs/images/holiday_table.png)
+
 *Figure 3: `holiday_lookup` table — NZ public holidays with `global` flag indicating nationwide vs. regional observance*
+
 **Notebook:** [Lookup_tables.ipynb](notebooks/Lookup_tables.ipynb)
 
 ### 2. Reference Data: Standardising Ticket Categories (Bronze Layer)
 
 A `category_lookup` table was built by hand, mapping the many inconsistent raw ticket category values (e.g. `BUG`, `Bug Report`, `bug_report`) into a single standardised `cleaned_category` and `cleaned_sub_category`. Splitting this into two levels allows reporting to either roll up to a small number of high-level categories for an executive view, or drill into sub-categories for operational detail.
+
 ![Category Lookup Table](docs/images/category_lookup_table.png)
 *Figure 4: `category_lookup` table — raw ticket category values mapped to standardised `cleaned_category` and `cleaned_sub_category`*
 
@@ -147,6 +149,7 @@ A set of data-quality validation rules was also applied, and the output was deli
 
 ![Quarantine Table](docs/images/quarantine_table.png)
 *Figure 5: `ticket_silver_quarantine` table — records failing validation, retained (not dropped) for review and re-submission*
+
 **Notebook:** [silver_Load.ipynb](notebooks/silver_Load.ipynb)
 
 ### 5. Gold Layer: Aggregated Reporting View
@@ -160,15 +163,14 @@ From the clean silver table, `gold_ticket_data` was built as a **materialized vi
 **Table:** `techsolve.ticket_gold.gold_ticket_data`
 **Notebook:** [Gold_Load.ipynb](notebooks/Gold_Load.ipynb)
 
-## 6. Dashboard
+### 6. Dashboard: Reporting & Visualisation
 
 Built on **Databricks AI/BI Dashboard**, reading directly from `gold_ticket_summary`. Reports on:
 - Ticket volume and issue type breakdown (category / sub-category)
 - Ticket status and resolution time trends (2024–2025)
 - Ticket volume in relation to NZ public holidays
 
-[View full dashboard (PDF)](docs/Ticket_Analytics_Dashbaord.pdf)
-
+[View full dashboard (PDF)](docs/Ticket_Analytics_Dashboard.pdf)
 
 ### 7. Orchestration: End-to-End Pipeline Automation
 
@@ -180,19 +182,15 @@ All stages above are wired into a single Databricks Job — **`TechSolve_Ticket_
 4. `gold_ticket_data`
 5. `Ticket_Summary_Dashboard`
 
-The full pipeline runs end-to-end on a single trigger. A complete run currently takes around **10 minutes** 
+The full pipeline runs end-to-end on a single trigger. A complete run currently takes around **10 minutes** (see Figure 2 below).
+
 ![Job Run History](docs/images/pipeline.png)
-*Figure 2: Successful end-to-end job run (~10 minutes total duration)*(see Figure 2 above).
+*Figure 2: Successful end-to-end job run (~10 minutes total duration)*
+
+---
 
 ## AI Agent
 
 Built using **Genie (Databricks AI/BI Genie)**, connected directly to the gold-layer tables. It can answer natural-language operational questions such as ticket trends, team performance, and problem areas, without a separate AI service, custom API integration, or additional authentication layer.
 
 [View full dashboard (PDF)](docs/Ticket_Data_Analytics_AI_Agent.pdf)
----
-
-
-
----
-
-
